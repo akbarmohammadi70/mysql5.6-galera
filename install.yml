@@ -1,0 +1,18 @@
+#- name: install galera cluster
+#  become: yes
+#  hosts: 
+#    - galera
+#  roles:
+#    - galera
+- name: install maxscale
+  become: yes
+  hosts: 
+    - lb
+  roles:
+    - maxscale
+- name: install keepalived on maxscale
+  become: yes
+  hosts: 
+    - lb
+  roles:
+    - keepalived

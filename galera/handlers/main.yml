@@ -1,0 +1,10 @@
+---
+- name: Enable mysql
+  service:
+    name: mysql
+    enabled: yes
+
+- name: start mysql node
+  service:
+    name: mysql
+    state: started

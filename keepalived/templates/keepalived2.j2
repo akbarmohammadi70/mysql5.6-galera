@@ -1,0 +1,23 @@
+global_defs {
+   notification_email {
+     {{ email }}
+   }
+   notification_email_from lb1@mydomain.com
+   smtp_server localhost
+   smtp_connect_timeout 30
+}
+
+vrrp_instance VI_1 {
+    state BACKUP
+        interface {{ interface_name }}
+        virtual_router_id 101
+        priority 99
+        advert_int 1
+        authentication {
+            auth_type PASS
+            auth_pass {{ pass }}
+        }
+        virtual_ipaddress {
+            {{ vip_keepalive }}
+        }
+}

@@ -1,0 +1,63 @@
+---
+- name: update
+  apt:
+    update-cache: yes
+  changed_when: 0
+  ignore_errors: yes
+
+- name: Install iptables
+  apt:
+    name: 
+      - iptables
+      - iptables-persistent
+    state: present
+  ignore_errors: yes
+
+- name: Set timezone to Asia/Tehran
+  timezone:
+    name: Asia/Tehran
+
+- name: Iptables rules 22,3306,4567,4568,4444 tcp
+  iptables:
+    chain: INPUT
+    protocol: tcp
+    destination_port: "{{ item }}"
+    action: insert
+    jump: ACCEPT
+  with_items:
+    - "22"
+    - "3306"
+    - "4567"
+    - "4568"
+    - "4444"
+- name: Iptables rules 4567 udp
+  iptables:
+    chain: INPUT
+    protocol: udp
+    destination_port: 4567
+    action: insert
+    jump: ACCEPT
+
+- name: Allow related and established connections
+  iptables:
+    chain: INPUT
+    ctstate: ESTABLISHED,RELATED
+    action: insert
+    jump: ACCEPT
+
+- name: Drop All append
+  iptables:
+    chain: INPUT
+    action: append
+    source: 0.0.0.0
+    destination: 0.0.0.0
+    jump: DROP
+  
+- name: save current state iptables
+  shell: iptables-save > /etc/iptables/rules.v4
+
+- name: add hosts
+  template: 
+    src: hosts.j2
+    dest: /etc/hosts
+...

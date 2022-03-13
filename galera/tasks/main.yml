@@ -1,0 +1,31 @@
+---
+- name: pre requirments install on ubuntu
+  include: requirment.yml
+  when: ansible_os_family == "Debian"
+  
+- name: install ubuntu mysql
+  include: mysql.yml
+  when: ansible_os_family == "Debian"
+
+- name: node1 galera 
+  include: galera1.yml
+  delegate_to: db1
+
+- name: galera_new_cluster node1
+  shell: /etc/init.d/mysql start --wsrep-new-cluster
+  delegate_to: db1
+ 
+- name: node2 galera
+  include: galera2.yml
+  delegate_to: db2  
+  notify:
+    - start mysql node  
+    - Enable mysql
+ 
+- name: node3
+  include: galera3.yml
+  delegate_to: db3
+  notify:
+    - start mysql node
+    - Enable mysql
+...

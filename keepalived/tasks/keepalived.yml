@@ -1,0 +1,20 @@
+- name: install keepalived
+  apt:
+    name: keepalived
+    state: present
+    force: True
+    update_cache: yes
+
+- name: add template
+  template:
+    src: keepalived.j2
+    dest: /etc/keepalived/keepalived.conf
+  delegate_to: lb1
+
+- name: add template
+  template:
+    src: keepalived2.j2
+    dest: /etc/keepalived/keepalived.conf
+  delegate_to: lb2
+
+  

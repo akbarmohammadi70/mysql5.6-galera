@@ -1,0 +1,94 @@
+---
+- name: Add apt key
+  apt_key:
+    keyserver: keyserver.ubuntu.com
+    id: BC19DDBA
+
+- name: APT package manager
+  shell: | 
+        cat <<EOF>> /etc/apt/sources.list.d/galera.list
+        deb http://releases.galeracluster.com/mysql-wsrep-5.6/ubuntu xenial main
+        deb http://releases.galeracluster.com/galera-3/ubuntu xenial main
+        EOF
+
+- name:  Prefer Codership repository
+  shell: |
+      cat <<EOF>> /etc/apt/preferences.d/galera.pref
+      # Prefer Codership repository
+      Package: *
+      Pin: origin releases.galeracluster.com
+      Pin-Priority: 1001
+      EOF
+
+- name: update
+  apt:
+    update-cache: yes
+  changed_when: 0
+  ignore_errors: yes
+
+- name: Installing mariadb and dependencies
+  apt:
+    name: "{{ item }}"
+    state: present
+    force: True
+  loop:
+    - galera-3
+    - galera-arbitrator-3
+    - mysql-wsrep-5.6
+    - python3-mysqldb
+    - rsync
+  ignore_errors: yes   
+  
+- name: Change root user password on first run
+  mysql_user: 
+    login_user: root
+    login_password: "{{ root_pass }}"
+    check_implicit_admin: yes
+    name: root
+    password: "{{ root_pass }}"
+    priv: '*.*:ALL,GRANT'
+    host: "{{ item }}"
+  with_items:
+    - "{{ ansible_hostname }}"
+    - 127.0.0.1
+    - ::1
+    - localhost
+  ignore_errors: yes
+  
+- name: delete anonymous MySQL server user for localhost
+  mysql_user: 
+    user: "" 
+    state: "absent"
+    login_user: root 
+    login_password: "{{ root_pass }}"
+    check_implicit_admin: yes
+  ignore_errors: yes
+ 
+- name: remove the MySQL test database
+  mysql_db: 
+    name: test 
+    state: absent
+    login_user: root 
+    login_password: "{{ root_pass }}"
+  ignore_errors: yes
+
+
+- name: creating mysql user 
+  mysql_user:
+    login_user: root
+    login_password: "{{ root_pass }}"
+    check_implicit_admin: yes
+    name: "{{ user_db }}"
+    password: "{{ user_db_pass }}"
+    priv: '*.*:ALL'
+    host: '%'
+    state: present 
+  ignore_errors: yes
+ 
+- name: stop mysql
+  service:
+    name: mysql
+    state: stopped
+  ignore_errors: yes
+  notify: Enable mysql
+...

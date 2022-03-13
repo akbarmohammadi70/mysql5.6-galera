@@ -1,0 +1,26 @@
+---
+# tasks file for maxscale
+
+- name: shecan
+  shell: echo "nameserver 178.22.122.100" > /etc/resolv.conf
+
+- name: wget
+  get_url:
+    url: https://downloads.mariadb.com/MaxScale/2.5.0/ubuntu/dists/focal/main/binary-amd64/maxscale-2.5.0-1.ubuntu.focal.x86_64.deb
+    dest: /tmp/maxscale-2.5.0-1.ubuntu.focal.x86_64.deb
+    mode: 777
+
+- name: install maxscale
+  apt: 
+    deb: /tmp/maxscale-2.5.0-1.ubuntu.focal.x86_64.deb
+- name: config maxscale
+  template: 
+    src: maxscale.cnf.j2
+    dest: /etc/maxscale.cnf
+  
+- name: restart maxscale
+  service: 
+    name: maxscale
+    state: started
+   
+    

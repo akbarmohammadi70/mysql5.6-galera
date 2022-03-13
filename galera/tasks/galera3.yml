@@ -1,0 +1,8 @@
+---
+- name: galera node3
+  template:
+    src: 50-server.cnf3.j2
+    dest: /etc/mysql/conf.d/galera.cnf
+    mode: 0644
+  
+...

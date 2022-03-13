@@ -1,0 +1,19 @@
+---
+- name: install keepalived
+  include: keepalived.yml
+  when: ansible_os_family == "Debian"
+
+- name:  port forward
+  shell: sysctl net.ipv4.ip_forward=1
+
+- name: start keepalived
+  service:
+    name: keepalived
+    state: started
+
+- name: Enable service keepalived
+  service:
+    name: keepalived
+    enabled: yes
+ 
+...
